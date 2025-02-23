@@ -47,7 +47,7 @@ func GetPlant(pid int) (*Plant, error) {
 	plant := Plant{Id: pid}
 	err := o.Read(&plant)
 	if err == orm.ErrNoRows {
-		return nil, errors.New("Plant not found")
+		return nil, errors.New("plant not found")
 	}
 	return &plant, nil
 }
@@ -68,7 +68,7 @@ func UpdatePlant(p *Plant) error {
 	o := orm.NewOrmUsingDB("mydatabase")
 	_, err := o.Update(p)
 	if err != nil {
-		return errors.New("Error updating plant")
+		return errors.New("error updating plant")
 	}
 	return nil
 }
@@ -93,7 +93,7 @@ func GetUserPlant(upid int) (*UserPlant, error) {
 	userPlant := UserPlant{Id: int(upid)}
 	err := o.Read(&userPlant)
 	if err == orm.ErrNoRows {
-		return nil, errors.New("User's plant not found")
+		return nil, errors.New("user's plant not found")
 	}
 	return &userPlant, nil
 }
@@ -114,7 +114,7 @@ func UpdateUserPlant(up *UserPlant) error {
 	o := orm.NewOrmUsingDB("mydatabase")
 	_, err := o.Update(up)
 	if err != nil {
-		return errors.New("Ошибка обновления растения пользователя")
+		return errors.New("an error occurred while updating the plant")
 	}
 	return nil
 }

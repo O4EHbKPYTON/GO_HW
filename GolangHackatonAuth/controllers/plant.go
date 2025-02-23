@@ -94,9 +94,9 @@ func (p *PlantController) Delete() {
 	if err == nil {
 		del := models.DeletePlant(pid)
 		if del {
-			p.Data["json"] = Respons{Err: false, Data: "Пользователь удален"}
+			p.Data["json"] = Respons{Err: false, Data: "Растение удалено"}
 		} else {
-			p.Data["json"] = Respons{Err: true, Data: "Пользователь не найден"}
+			p.Data["json"] = Respons{Err: true, Data: "Растение  не найдено"}
 		}
 	}
 	p.ServeJSON()

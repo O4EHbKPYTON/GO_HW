@@ -27,6 +27,11 @@ type User struct {
 	Password string `orm:"column(password_hash)"`
 }
 
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 // Создание секретного ключа
 var SecretKey = []byte("your-secret-key")
 
@@ -77,7 +82,7 @@ func GetUser(uid int64) (u *User, err error) {
 	user := User{Id: uid}
 	err = o.Read(&user)
 	if err == orm.ErrNoRows {
-		return nil, errors.New("Пользователь с таким id не найден")
+		return nil, errors.New("user with this id not found")
 	}
 	return &user, nil
 }
@@ -95,21 +100,30 @@ func UpdateUser(uu *User) (err error) {
 	o := orm.NewOrmUsingDB("mydatabase")
 	_, err = o.Update(uu, "username", "password_hash")
 	if err != nil {
-		return errors.New("User not found")
+		return errors.New("user not found")
 	}
 	return nil
 }
 
-func Login(u User) (string, error) {
+func Login(req LoginRequest) (string, error) {
 	o := orm.NewOrmUsingDB("mydatabase")
-	err := o.Read(&u, "username", "password_hash")
+
+	var user User
+	err := o.QueryTable("user").Filter("username", req.Username).One(&user)
 	if err != nil {
-		if err == orm.ErrNoRows {
-			return "", errors.New("invalid credentials")
+		if errors.Is(err, orm.ErrNoRows) {
+			return "", errors.New("invalid username or password")
 		}
 		return "", err
 	}
-	return CreateToken(u)
+
+	// Сравниваем пароль
+	if req.Password != user.Password {
+		return "", errors.New("invalid username or password")
+	}
+
+	// Генерируем токен, если логин и пароль верны
+	return CreateToken(user)
 }
 
 func DeleteUser(uid int64) bool {

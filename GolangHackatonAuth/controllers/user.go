@@ -32,7 +32,7 @@ func (u *UserController) HandlerFunc(rules string) bool {
 	switch rules {
 	case "GetAll", "Logout":
 		// Проверка сессии
-		accessToken, ok := u.GetSession("accessToken").(string) //27 строка
+		accessToken, ok := u.GetSession("accessToken").(string)
 		if !ok || accessToken == "" {
 			u.Abort("401")
 			return true
@@ -156,26 +156,32 @@ func (u *UserController) Delete() {
 }
 
 // @Title Login
-// @Description Logs user into the system
-// @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {string} login success
-// @Failure 403 user not exist
+// @Description Авторизация пользователя
+// @Param	body		body 	models.LoginRequest	true	"Данные для входа (логин и пароль)"
+// @Success 200 {object} Respons "Успешный вход, возвращает токен"
+// @Failure 400 {object} Respons "Ошибка в теле запроса"
+// @Failure 401 {object} Respons "Неверные логин или пароль"
 // @router /login [post]
 func (u *UserController) Login() {
-	var user models.User
-	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &user); err != nil {
+	var loginReq models.LoginRequest
+
+	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &loginReq); err != nil {
+		u.Ctx.Output.SetStatus(400)
 		u.Data["json"] = Respons{Err: true, Data: "Invalid request"}
 		u.ServeJSON()
 		return
 	}
 
-	token, err := models.Login(user)
+	token, err := models.Login(loginReq)
 	if err != nil {
+		u.Ctx.Output.SetStatus(401)
 		u.Data["json"] = Respons{Err: true, Data: err.Error()}
-	} else {
-		u.SetSession("accessToken", token)
-		u.Data["json"] = Respons{Err: false, Data: token}
+		u.ServeJSON()
+		return
 	}
+
+	u.SetSession("accessToken", token)
+	u.Data["json"] = Respons{Err: false, Data: token}
 	u.ServeJSON()
 }
 
