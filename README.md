@@ -15,3 +15,7 @@ https://github.com/O4EHbKPYTON/GO_HW/commit/7e99a0ae72e3e2b9834953faa99951946900
 ## GO_HW4
 #GO_HW4
 https://github.com/O4EHbKPYTON/GO_HW/commit/4194e84205a89f4b2cc3d8c680658f1d97891d1e
+
+## GO_HW5
+#GO_HW5
+[https://github.com/O4EHbKPYTON/GO_HW/commit/4194e84205a89f4b2cc3d8c680658f1d97891d1e](https://github.com/O4EHbKPYTON/GO_HW/commit/f99bf1290e861deb3036f337b0d7748c3e362aa3)
