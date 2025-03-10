@@ -35,6 +35,8 @@ type LoginRequest struct {
 // Создание секретного ключа
 var SecretKey = []byte("your-secret-key")
 
+// лучше timestamp использовать
+// в сессию добавить data update data start
 func CreateToken(u User) (string, error) {
 	// создаем заявку
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

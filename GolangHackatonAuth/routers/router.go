@@ -14,6 +14,7 @@ import (
 )
 
 func init() {
+	beego.Router("/ws", &controllers.WebSocketController{}, "get:Get")
 	ns := beego.NewNamespace("/v1",
 		beego.NSNamespace("/user",
 			beego.NSInclude(&controllers.UserController{}),

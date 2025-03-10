@@ -4,7 +4,6 @@ import (
 	"api/models"
 	"encoding/json"
 	beego "github.com/beego/beego/v2/server/web"
-	"strings"
 )
 
 // Operations about Users
@@ -27,46 +26,11 @@ func (u *UserController) SessionTest() {
 	u.ServeJSON()
 }
 
-// Проверка заголовков для всех запросов
 func (u *UserController) HandlerFunc(rules string) bool {
 	switch rules {
 	case "GetAll", "Logout":
-		// Проверка сессии
-		accessToken, ok := u.GetSession("accessToken").(string)
-		if !ok || accessToken == "" {
-			u.Abort("401")
-			return true
-		}
-
-		// Проверка заголовка
-		authHeader := u.Ctx.Input.Header("Authorization")
-		if authHeader == "" {
-			u.Abort("401")
-			return true
-		}
-
-		// Извлечение токена
-		accessTokenFromHeader := authHeader
-		if strings.HasPrefix(authHeader, "Bearer ") {
-			accessTokenFromHeader = strings.TrimPrefix(authHeader, "Bearer ")
-		} else {
-			accessTokenFromHeader = authHeader
-		}
-
-		// Верификация токена
-		claims, err := models.VerifyToken(accessTokenFromHeader)
-		if err != nil || claims == nil {
-			u.Abort("401")
-			return true
-		}
-
-		// Сравнение токенов
-		if accessTokenFromHeader != accessToken {
-			u.Abort("401")
-			return true
-		}
-
-		return false
+		auth := AuthController{Controller: u.Controller}
+		return auth.CheckAuth()
 	default:
 		return false
 	}
@@ -180,7 +144,7 @@ func (u *UserController) Login() {
 		return
 	}
 
-	u.SetSession("accessToken", token)
+	//u.SetSession("accessToken", token)
 	u.Data["json"] = Respons{Err: false, Data: token}
 	u.ServeJSON()
 }
