@@ -67,7 +67,7 @@ func (u *UserController) GetAll() {
 // @Description get user by uid
 // @Param	uid		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.User
-// @Failure 403 :uid is empty
+// @Failure 403 {string} string "uid is empty"
 // @router /:uid [get]
 func (u *UserController) Get() {
 	uid, err := u.GetInt64(":uid")

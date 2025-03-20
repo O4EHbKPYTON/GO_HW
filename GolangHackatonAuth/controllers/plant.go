@@ -75,7 +75,7 @@ func (p *PlantController) GetAll() {
 // @Security BearerAuth
 // @Param	pid		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.Plant
-// @Failure 403 :pid is empty
+// @Failure 403 {string} string "pid is empty"
 // @router /:pid [get]
 func (p *PlantController) Get() {
 	if !p.checkAuth() {
