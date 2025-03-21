@@ -59,14 +59,21 @@ func (p *PlantController) Post() {
 // @Description get all plants
 // @Security BearerAuth
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
-// @Success 200 {object} models.Plant
+// @Success 200 {object} models.PlantList
 // @router / [get]
 func (p *PlantController) GetAll() {
 	if !p.checkAuth() {
 		return
 	}
-	plants := models.GetAllPlants()
-	p.Data["json"] = Respons{Err: false, Data: plants}
+	plants, err := models.GetAllPlants()
+	if err != nil {
+		p.Ctx.Output.SetStatus(500)
+		p.Data["json"] = map[string]string{"error": err.Error()}
+		p.ServeJSON()
+		return
+	}
+
+	p.Data["json"] = plants
 	p.ServeJSON()
 }
 
@@ -78,9 +85,6 @@ func (p *PlantController) GetAll() {
 // @Failure 403 {string} string "pid is empty"
 // @router /:pid [get]
 func (p *PlantController) Get() {
-	if !p.checkAuth() {
-		return
-	}
 	pid, err := p.GetInt(":pid")
 	if err == nil {
 		plant, err := models.GetPlant(pid)

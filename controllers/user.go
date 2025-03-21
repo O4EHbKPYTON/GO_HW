@@ -38,15 +38,26 @@ func (u *UserController) HandlerFunc(rules string) bool {
 
 // @Title CreateUser
 // @Description create users
-// @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {int} models.User.Id
+// @Param	body		body 	models.PostUserRequest	true		"body1 for user content"
+// @Success 200 {object} models.PostUserResponse
 // @Failure 403 body is empty
 // @router / [post]
 func (u *UserController) Post() {
-	var user models.User
-	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
+	var userReq models.PostUserRequest
+	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &userReq); err != nil {
+		u.Data["json"] = Respons{Err: true, Data: "Invalid request"}
+		u.ServeJSON()
+		return
+	}
+
+	user := models.User{
+		Username: userReq.Username,
+		Email:    userReq.Email,
+		Password: userReq.Password,
+	}
+
 	uid := models.AddUser(user)
-	u.Data["json"] = Respons{Err: false, Data: uid}
+	u.Data["json"] = Respons{Err: false, Data: models.PostUserResponse{Id: uid}}
 	u.ServeJSON()
 }
 

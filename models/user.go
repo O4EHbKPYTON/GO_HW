@@ -21,6 +21,16 @@ func init() {
 	orm.RegisterModel(new(Session))
 }
 
+type PostUserRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type PostUserResponse struct {
+	Id int64 `json:"id"`
+}
+
 type User struct {
 	Id       int64  `orm:"auto;column(id)"`
 	Username string `orm:"column(username)"`

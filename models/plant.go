@@ -13,6 +13,13 @@ func init() {
 	orm.RegisterModel(new(Plant), new(UserPlant))
 }
 
+type PlantList struct {
+	PlantName           string `orm:"column(plant_name)" json:"plant_name"`
+	PlantScientificName string `orm:"column(plant_scientific_name)" json:"plant_scientific_name"`
+	ImageURL            string `orm:"column(image_url)" json:"image_url"`
+	Id                  int    `orm:"column(id)" json:"plant_id"`
+}
+
 type Plant struct {
 	Id               int    `orm:"column(id);auto"`
 	Name             string `orm:"column(name);size(255)"`
@@ -22,6 +29,7 @@ type Plant struct {
 	TemperatureRange string `orm:"column(temperature_range);size(50)"`
 	HumidityRange    string `orm:"column(humidity_range);size(50)"`
 	Description      string `orm:"column(description);type(text)"`
+	ImageURL         string `orm:"column(image_url)" json:"image_url"`
 }
 
 type UserPlant struct {
@@ -44,24 +52,64 @@ func AddPlant(p *Plant) (int64, error) {
 
 func GetPlant(pid int) (*Plant, error) {
 	o := orm.NewOrmUsingDB("mydatabase")
-	plant := Plant{Id: pid}
-	err := o.Read(&plant)
+
+	var plant Plant
+
+	query := `
+       SELECT
+            p.id,
+            p.name,
+            p.scientific_name,
+            p.water_frequency,
+            p.light_requirement,
+            p.temperature_range,
+            p.humidity_range,
+            p.description,
+            pi.image_url
+        FROM
+            plant p
+        LEFT JOIN
+            user_plants up ON p.id = up.plant_id
+        LEFT JOIN
+            plant_images pi ON up.id = pi.user_plant_id
+        WHERE
+            p.id = ?; 
+    `
+
+	err := o.Raw(query, pid).QueryRow(&plant)
 	if err == orm.ErrNoRows {
 		return nil, errors.New("plant not found")
+	} else if err != nil {
+		return nil, fmt.Errorf("error fetching plant: %v", err)
 	}
+
 	return &plant, nil
 }
 
-func GetAllPlants() []Plant {
-	var plants []Plant
+func GetAllPlants() ([]PlantList, error) {
+	var plants []PlantList
 	o := orm.NewOrmUsingDB("mydatabase")
-	qb, _ := orm.NewQueryBuilder("postgres")
-	qb.Select("*").From("plants")
-	_, err := o.Raw(qb.String()).QueryRows(&plants)
+
+	query := `
+        SELECT
+	p.id,
+    p.name AS plant_name,
+    p.scientific_name AS plant_scientific_name,
+    pi.image_url AS image_url
+FROM
+    plant p
+        LEFT JOIN
+    user_plants up ON p.id = up.plant_id
+        LEFT JOIN
+    plant_images pi ON up.id = pi.user_plant_id;
+    `
+
+	_, err := o.Raw(query).QueryRows(&plants)
 	if err != nil {
-		fmt.Println("Error getting plants:", err)
+		return nil, fmt.Errorf("error fetching plants with images: %v", err)
 	}
-	return plants
+
+	return plants, nil
 }
 
 func UpdatePlant(p *Plant) error {
