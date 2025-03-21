@@ -22,8 +22,9 @@ func init() {
 }
 
 type User struct {
-	Id       int64  `orm:"column(id)"`
+	Id       int64  `orm:"auto;column(id)"`
 	Username string `orm:"column(username)"`
+	Email    string `orm:"column(email)"`
 	Password string `orm:"column(password_hash)"`
 }
 
