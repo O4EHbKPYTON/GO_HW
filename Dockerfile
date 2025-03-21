@@ -1,33 +1,22 @@
-FROM golang:1.23-alpine AS build
-WORKDIR /build
+FROM golang:1.23-alpine AS runner
 
+WORKDIR /app
+
+# Устанавливаем нужные пакеты
+RUN apk add --no-cache curl git make
+
+# Устанавливаем Swag и BeeGo CLI
 RUN go install github.com/swaggo/swag/cmd/swag@latest
+RUN go install github.com/beego/bee/v2@latest
 
-COPY go.mod go.sum ./
-RUN go mod download
-
+# Копируем код в контейнер
 COPY . .
 
+# Загружаем зависимости
+RUN go mod download
+
+# Генерируем Swagger-документацию
 RUN swag init
 
-RUN apk add --no-cache make
-RUN go build -o main main.go 
-
-FROM alpine AS runnder 
-
-WORKDIR /app
-
-RUN apk add --no-cache make
-RUN go build -o main main.go  
-
-FROM alpine AS runner
-
-WORKDIR /app
-
-RUN apk add --no-cache curl
-
-COPY --from=build /build/main ./main
-COPY --from=build /build/docs ./docs
-COPY --from=build /build/swagger.yaml ./swagger.yaml
-
-CMD ["/app/main"]
+# Запускаем Beego с генерацией документации
+CMD ["bee", "run", "-gendoc=true", "-downdoc=true"]
